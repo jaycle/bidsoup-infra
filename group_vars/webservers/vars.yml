@@ -1,0 +1,4 @@
+---
+# Path to deploy script
+deploy_install_dir: /var/scripts/
+deploy_install_location: "{{ deploy_install_dir }}update-and-start-deploy.sh"

@@ -1,0 +1,105 @@
+---
+# Playbook for setting up a new webserver
+- hosts: all
+  become: yes
+  vars:
+    ansible_become_pass: '{{ ansible_pass }}'
+    ansible_user: ansible
+
+  tasks:
+  - name: Install nginx
+    apt:
+      name: nginx
+      state: present
+
+  - name: Copy nginx site config
+    copy:
+      src: files/bidchowder.conf
+      dest: /etc/nginx/sites-available
+      mode: 0644
+    notify:
+      - restart nginx
+
+  - name: Update default enabled site
+    file:
+      state: link
+      src: /etc/nginx/sites-available/bidchowder.conf
+      dest: /etc/nginx/sites-enabled/default
+    notify:
+      - restart nginx
+
+  - name: Add CI/CD group
+    group:
+      name: ci-cd
+
+  # hook role sets a new_user variable
+  - name: Install webhook handler
+    include_role:
+      name: hooks
+    vars:
+      hook_command_path: "{{ deploy_install_location }}"
+      hook_user_groups:
+        - ci-cd
+
+  - name: Add script called by hooks
+    copy:
+      src: files/update-and-start-deploy.sh
+      dest: "{{ deploy_install_location }}"
+      owner: "{{ new_user.name }}"
+      group: "{{ new_user.group }}"
+
+  - name: Add settings file used by deploy script
+    template:
+      src: templates/site-settings.sh.j2
+      dest: "{{ deploy_install_dir }}site-settings.sh"
+      group: ci-cd
+
+  - name: Clone repo
+    git:
+      repo: 'git@github.com:jaycle/bidsoup.git'
+      dest: /var/code/bidsoup
+      key_file: "{{ new_user.ssh_key_file }}"
+      umask: '002'
+    notify: setup repo permissions
+
+  - name: Install Docker
+    include_role:
+      name: geerlingguy.docker
+    vars:
+      docker_users:
+        - jayson
+        - mardotio
+        - "{{ new_user.name }}"
+
+  - name: Create data mount directory
+    file:
+      path: /var/lib/bidsoup/data/prod
+      state: directory
+      group: docker
+      mode: 0774
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+
+    - name: Set repo sharable
+      shell: git config --add core.sharedRepository group
+      args:
+        chdir: /var/code/bidsoup
+      listen: setup repo permissions
+
+    - name: Update repo permissions
+      file:
+        path: /var/code/bidsoup
+        recurse: yes
+        owner: hooker
+        group: ci-cd
+      listen: setup repo permissions
+
+    - name: Set .git directory to sticky group
+      file:
+        path: /var/code/bidsoup/.git
+        mode: g+s
+      listen: setup repo permissions

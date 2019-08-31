@@ -1,0 +1,7 @@
+# handlers file for hooks
+---
+- name: restart webhook
+  systemd:
+    name: webhook
+    state: restarted
+    daemon_reload: yes

@@ -1,0 +1,34 @@
+---
+- name: Install webhook handler
+  apt:
+    name: webhook
+    state: present
+  notify: restart webhook
+
+
+- name: Install system.d conf file
+  template:
+    src: templates/github.conf.j2
+    dest: /etc/systemd/system/webhook.service.d/github.conf
+  notify: restart webhook
+
+- name: Add the hooks user
+  user:
+    name: "{{ hook_user }}"
+    generate_ssh_key: yes
+    append: yes
+    groups: "{{ hook_user_groups }}"
+  register: new_user
+
+- name: Add to GitHub message
+  debug:
+    msg:
+    - "Please add the following key to GitHub deploy keys section: {{ new_user.ssh_public_key }}"
+
+- name: Add the hooks file
+  template:
+    src: templates/hooks.json.j2
+    dest: /var/hooks/hooks.json
+    owner: "{{ new_user.name }}"
+    group: "{{ new_user.group }}"
+  notify: restart webhook

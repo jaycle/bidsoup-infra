@@ -1,0 +1,4 @@
+[Service]
+ExecStart=
+ExecStart=/usr/bin/webhook -nopanic -hooks /var/hooks/hooks.json
+User={{ hook_user }}
