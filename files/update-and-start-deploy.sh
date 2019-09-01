@@ -2,6 +2,11 @@
 
 # Script to update to the latest branch and kick off the deployment
 
+# Set up logging for standard out
+exec 3> >(logger -t deploy-script)
+BASH_XTRACEFD='3'
+exec >&3 2>&1
+
 export GIT_WORK_TREE=/var/code/bidsoup
 export GIT_DIR=$GIT_WORK_TREE/.git
 git fetch
