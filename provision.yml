@@ -61,6 +61,7 @@
       repo: 'git@github.com:mardotio/bidsoup.git'
       dest: /var/code/bidsoup
       key_file: "{{ new_user.ssh_key_file }}"
+      force: yes
       umask: '002'
     notify: setup repo permissions
 
