@@ -52,11 +52,13 @@
     template:
       src: templates/site-settings.sh.j2
       dest: "{{ deploy_install_dir }}site-settings.sh"
-      group: ci-cd
+      owner: "{{ new_user.name }}"
+      group: "{{ new_user.group }}"
+      mode: 0660
 
   - name: Clone repo
     git:
-      repo: 'git@github.com:jaycle/bidsoup.git'
+      repo: 'git@github.com:mardotio/bidsoup.git'
       dest: /var/code/bidsoup
       key_file: "{{ new_user.ssh_key_file }}"
       umask: '002'
