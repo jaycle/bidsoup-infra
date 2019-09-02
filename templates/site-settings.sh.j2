@@ -2,5 +2,5 @@
 
 export DJANGO_SECRET_KEY="{{ DJANGO_SECRET_KEY }}"
 export PSQL_DATA_PATH=/var/lib/bidsoup/data/prod
-export PG_PASS=testpass # change to: "{{ PG_PASS }}"
+export PG_PASS="{{ PG_PASS }}"
 export SERV_PORT=8000
