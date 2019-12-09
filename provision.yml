@@ -30,7 +30,7 @@
       certbot_create_standalone_stop_services: nginx
       certbot_certs:
         - domains:
-          - bidchowder.com
+          - www.bidchowder.com
 
   - name: Nginx cert directory
     file:
