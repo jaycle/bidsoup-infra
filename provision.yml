@@ -20,6 +20,28 @@
     notify:
       - restart nginx
 
+  - name: Install and configure certbot
+    include_role:
+      name: geerlingguy.certbot
+    vars:
+      certbot_create_if_missing: True
+      certbot_create_method: standalone
+      certbot_admin_email: jayson.cleary@gmail.com
+      certbot_create_standalone_stop_services: nginx
+      certbot_certs:
+        - domains:
+          - www.bidchowder.com
+
+  - name: Nginx cert directory
+    file:
+      path: /etc/nginx/certs
+      state: directory
+
+  - name: Generate dh params
+    command: openssl dhparam -out /etc/nginx/certs/dhparams.pem 2048
+    args:
+      creates: /etc/nginx/certs/dhparams.pem
+
   - name: Update default enabled site
     file:
       state: link

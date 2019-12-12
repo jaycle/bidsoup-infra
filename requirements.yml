@@ -1,2 +1,3 @@
 # For installing docker
 - src: geerlingguy.docker
+- src: geerlingguy.certbot
