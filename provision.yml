@@ -78,6 +78,19 @@
       group: "{{ new_user.group }}"
       mode: 0660
 
+  - name: Create service for startup
+    template:
+      src: templates/start-bidsoup.service.j2
+      dest: /etc/systemd/system/start-bidsoup.service
+      mode: 0644
+    vars:
+      run_user: "{{ new_user.name }}"
+
+  - name: Enable start-bidsoup service
+    systemd:
+      name: start-bidsoup
+      enabled: yes
+
   - name: Clone repo
     git:
       repo: 'git@github.com:mardotio/bidsoup.git'

@@ -1,0 +1,12 @@
+[Unit]
+Description=Start bidsoup stack
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/var/scripts/update-and-start-deploy.sh
+User={{ run_user }}
+
+[Install]
+WantedBy=multi-user.target
