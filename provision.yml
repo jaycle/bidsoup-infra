@@ -20,10 +20,20 @@
     notify:
       - restart nginx
 
+  - name: Create well-known directory
+    file:
+      path: /var/www/letsencrypt
+      state: directory
+      mode: 0755
+
   - name: Install and configure certbot
     include_role:
       name: geerlingguy.certbot
     vars:
+      certbot_auto_renew_user: root
+      certbot_auto_renew_options: >-
+        --quiet --no-self-upgrade --webroot -w /var/www/letsencrypt/
+        --deploy-hook "systemctl reload nginx"
       certbot_create_if_missing: True
       certbot_create_method: standalone
       certbot_admin_email: jayson.cleary@gmail.com
